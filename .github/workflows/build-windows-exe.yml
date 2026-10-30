@@ -1,0 +1,56 @@
+name: Build Network Finder for Windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'NetworkFinder.ps1'
+      - 'Repair-Wifi.ps1'
+      - '.github/workflows/build-windows-exe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install PS2EXE
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name ps2exe -Scope CurrentUser -Force -AllowClobber
+          Import-Module ps2exe -Force
+
+      - name: Compile GUI executable
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Invoke-PS2EXE `
+            -inputFile .\NetworkFinder.ps1 `
+            -outputFile .\dist\NetworkFinder.exe `
+            -noConsole `
+            -title 'Network Finder' `
+            -description 'Lightweight Windows Wi-Fi network manager' `
+            -product 'Network Finder' `
+            -version '1.0.0.0' `
+            -STA
+          Copy-Item .\Repair-Wifi.ps1 .\dist\Repair-Wifi.ps1
+          Compress-Archive -Path .\dist\NetworkFinder.exe, .\dist\Repair-Wifi.ps1 -DestinationPath .\dist\NetworkFinder-Windows.zip -Force
+
+      - name: Publish executable and companion recovery helper
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetworkFinder-Windows
+          path: |
+            dist/NetworkFinder.exe
+            dist/Repair-Wifi.ps1
+            dist/NetworkFinder-Windows.zip
+          if-no-files-found: error
+          retention-days: 30

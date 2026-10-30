@@ -12,6 +12,10 @@ A lightweight Windows Wi-Fi network picker and basic recovery helper. It scans n
 
 Extract the files to a folder and double-click **Launch Network Finder.bat**. Select a network and press **Connect**, or double-click the network. A secured network prompts for its password. Close/minimize the window to leave the small tray icon available; right-click the tray icon and choose **Exit** to quit. Connecting is handled by Windows, so quitting this app does not disconnect Wi-Fi.
 
+### Compiled executable
+
+Each update to the app or build workflow compiles a Windows GUI executable. Open the repository's **Actions** tab, select the latest **Build Network Finder for Windows** run, and download the `NetworkFinder-Windows` artifact. Extract it and double-click **NetworkFinder.exe**; no batch file is needed. Keep **Repair-Wifi.ps1** in the same folder as the EXE because the elevated recovery action launches that helper. The executable uses Windows' built-in PowerShell and .NET components; this is a Windows-targeted build, not a separate runtime bundle. The source remains available in this repository.
+
 ## Repair and diagnostics
 
 Before the first scan, the app checks whether WLAN AutoConfig is running and whether a recognized physical Wi-Fi adapter is disabled. If either condition is detected, it offers to launch **Repair-Wifi.ps1** with Windows UAC administrator approval. The elevated helper restarts WLAN AutoConfig and cycles the physical Wi-Fi adapter. You can also use **Repair Wi-Fi (Admin)** at any time. Adapter cycling briefly interrupts any existing connection. UAC approval is required; the app cannot elevate silently.
